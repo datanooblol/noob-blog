@@ -22,7 +22,7 @@ def create_slug(title: str) -> str:
 def create_new_article(article_data: ArticleCreate, creator_id: str) -> Optional[ArticleResponse]:
     """Create a new article"""
     article_id = str(uuid.uuid4())
-    slug = create_slug(article_data.title)
+    slug = article_data.slug or create_slug(article_data.title)
     now = datetime.utcnow().isoformat()
     
     # Check if slug already exists
@@ -35,6 +35,7 @@ def create_new_article(article_data: ArticleCreate, creator_id: str) -> Optional
         'title': article_data.title,
         'slug': slug,
         'content': article_data.content,
+        'html_content': article_data.html_content,
         'cover_image': article_data.cover_image or '',
         'status': 'draft',
         'creator_id': creator_id,
@@ -82,9 +83,15 @@ def update_existing_article(article_id: str, article_data, creator_id: str) -> O
     # Update fields if provided
     if article_data.title:
         updates['title'] = article_data.title
-        updates['slug'] = create_slug(article_data.title)
+        # Only update slug if article is not published
+        if article['status'] != 'published':
+            updates['slug'] = article_data.slug or create_slug(article_data.title)
+    if article_data.slug and article['status'] != 'published':
+        updates['slug'] = article_data.slug
     if article_data.content is not None:
         updates['content'] = article_data.content
+    if article_data.html_content is not None:
+        updates['html_content'] = article_data.html_content
     if article_data.cover_image is not None:
         updates['cover_image'] = article_data.cover_image
     if article_data.tags is not None:

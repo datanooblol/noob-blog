@@ -1,0 +1,185 @@
+/* Shared Content Styles - Single source of truth for editor, preview, and article */
+
+:root {
+  /* Typography Variables */
+  --content-font-size: 1.125rem;
+  --content-line-height: 1.75;
+  --content-color: #374151;
+  
+  /* Heading Variables */
+  --h1-size: 2rem;
+  --h1-margin: 2.5rem 0 1.5rem 0;
+  --h1-color: #111827;
+  
+  --h2-size: 1.5rem;
+  --h2-margin: 2rem 0 1rem 0;
+  --h2-color: #111827;
+  
+  --h3-size: 1.25rem;
+  --h3-margin: 1.5rem 0 1rem 0;
+  --h3-color: #111827;
+  
+  /* Link Variables */
+  --link-color: #2563eb;
+  --link-hover-color: #1d4ed8;
+  --link-underline-offset: 2px;
+  
+  /* Spacing Variables */
+  --paragraph-margin: 1.5rem;
+  --list-margin: 1.5rem;
+}
+
+/* Base Content Styles */
+.content-styles {
+  font-size: var(--content-font-size);
+  line-height: var(--content-line-height);
+  color: var(--content-color);
+}
+
+.content-styles h1 {
+  font-size: var(--h1-size);
+  font-weight: bold;
+  margin: var(--h1-margin);
+  color: var(--h1-color);
+}
+
+.content-styles h2 {
+  font-size: var(--h2-size);
+  font-weight: bold;
+  margin: var(--h2-margin);
+  color: var(--h2-color);
+}
+
+.content-styles h3 {
+  font-size: var(--h3-size);
+  font-weight: bold;
+  margin: var(--h3-margin);
+  color: var(--h3-color);
+}
+
+.content-styles p {
+  margin-bottom: var(--paragraph-margin);
+  line-height: var(--content-line-height);
+  color: var(--content-color);
+  font-size: var(--content-font-size);
+}
+
+.content-styles a {
+  color: var(--link-color);
+  text-decoration: underline;
+  text-underline-offset: var(--link-underline-offset);
+}
+
+.content-styles a:hover {
+  color: var(--link-hover-color);
+  text-decoration: underline;
+}
+
+.content-styles ol,
+.content-styles ul {
+  list-style-type: decimal;
+  margin-left: 1.5rem;
+  margin-bottom: var(--list-margin);
+}
+
+.content-styles ul {
+  list-style-type: disc;
+}
+
+.content-styles li {
+  margin-bottom: 0.5rem;
+  line-height: var(--content-line-height);
+  color: var(--content-color);
+}
+
+/* Apply to BlockNote Editor */
+.bn-editor {
+  font-size: var(--content-font-size) !important;
+  line-height: var(--content-line-height) !important;
+  color: var(--content-color) !important;
+}
+
+.bn-editor h1 {
+  font-size: var(--h1-size) !important;
+  font-weight: bold !important;
+  margin: var(--h1-margin) !important;
+  color: var(--h1-color) !important;
+}
+
+.bn-editor h2 {
+  font-size: var(--h2-size) !important;
+  font-weight: bold !important;
+  margin: var(--h2-margin) !important;
+  color: var(--h2-color) !important;
+}
+
+.bn-editor h3 {
+  font-size: var(--h3-size) !important;
+  font-weight: bold !important;
+  margin: var(--h3-margin) !important;
+  color: var(--h3-color) !important;
+}
+
+.bn-editor p {
+  margin-bottom: var(--paragraph-margin) !important;
+  line-height: var(--content-line-height) !important;
+  color: var(--content-color) !important;
+  font-size: var(--content-font-size) !important;
+}
+
+.bn-editor a {
+  color: var(--link-color) !important;
+  text-decoration: underline !important;
+  text-underline-offset: var(--link-underline-offset) !important;
+}
+
+.bn-editor a:hover {
+  color: var(--link-hover-color) !important;
+  text-decoration: underline !important;
+}
+
+/* Apply to Article Content */
+.article-content {
+  font-size: var(--content-font-size);
+  line-height: var(--content-line-height);
+  color: var(--content-color);
+}
+
+.article-content h1 {
+  font-size: var(--h1-size);
+  font-weight: bold;
+  margin: var(--h1-margin);
+  color: var(--h1-color);
+}
+
+.article-content h2 {
+  font-size: var(--h2-size);
+  font-weight: bold;
+  margin: var(--h2-margin);
+  color: var(--h2-color);
+}
+
+.article-content h3 {
+  font-size: var(--h3-size);
+  font-weight: bold;
+  margin: var(--h3-margin);
+  color: var(--h3-color);
+}
+
+.article-content p {
+  margin-bottom: var(--paragraph-margin);
+  line-height: var(--content-line-height);
+  color: var(--content-color);
+  font-size: var(--content-font-size);
+}
+
+.article-content a {
+  color: var(--link-color);
+  text-decoration: underline;
+  text-underline-offset: var(--link-underline-offset);
+}
+
+.article-content a:hover {
+  color: var(--link-hover-color);
+  text-decoration: underline;
+}

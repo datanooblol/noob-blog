@@ -1,11 +1,20 @@
 from fastapi import FastAPI, HTTPException
 import boto3
 from botocore.exceptions import EndpointConnectionError
+from fastapi.middleware.cors import CORSMiddleware
 from package.routers.auth.endpoint import router as auth_router
 from package.routers.articles.endpoint import router as articles_router
 
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Your frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Include routers
 routers = [auth_router, articles_router]

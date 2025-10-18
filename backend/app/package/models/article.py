@@ -5,7 +5,9 @@ from datetime import datetime
 # Request models
 class ArticleCreate(BaseModel):
     title: str
+    slug: Optional[str] = None
     content: List[Dict[str, Any]]  # BlockNote JSON array
+    html_content: Optional[str] = None # For caching
     cover_image: Optional[str] = None
     tags: Optional[List[str]] = []
     seo_description: Optional[str] = None
@@ -19,7 +21,9 @@ class ArticleCreate(BaseModel):
 
 class ArticleUpdate(BaseModel):
     title: Optional[str] = None
+    slug: Optional[str] = None
     content: Optional[List[Dict[str, Any]]] = None  # BlockNote JSON array
+    html_content: Optional[str] = None # For caching
     cover_image: Optional[str] = None
     tags: Optional[List[str]] = None
     seo_description: Optional[str] = None
@@ -31,6 +35,7 @@ class ArticleResponse(BaseModel):
     title: str
     slug: str
     content: List[Dict[str, Any]]  # BlockNote JSON array
+    html_content: Optional[str] = None # For display
     cover_image: Optional[str] = None
     status: str
     creator_id: str

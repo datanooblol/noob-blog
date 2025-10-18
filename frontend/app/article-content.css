@@ -1,0 +1,181 @@
+/* Article Content Styles - Affects /articles/blog/slug pages */
+.article-content h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 2.5rem 0 1.5rem 0;
+  color: #111827;
+}
+
+.article-content h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 2rem 0 1rem 0;
+  color: #111827;
+}
+
+.article-content h3 {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin: 1.5rem 0 1rem 0;
+  color: #111827;
+}
+
+.article-content p {
+  margin-bottom: 1.5rem;
+  line-height: 1.75;
+  color: #374151;
+  font-size: 1.125rem;
+}
+
+.article-content strong {
+  font-weight: bold;
+}
+
+.article-content em {
+  font-style: italic;
+}
+
+.article-content ol {
+  list-style-type: decimal;
+  margin-left: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.article-content ul {
+  list-style-type: disc;
+  margin-left: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.article-content li {
+  margin-bottom: 0.5rem;
+  line-height: 1.75;
+  color: #374151;
+}
+
+.article-content li p {
+  margin-bottom: 0.5rem;
+}
+
+.article-content blockquote {
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  color: #6b7280;
+}
+
+.article-content hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 2rem 0;
+}
+
+.article-content li p.bn-inline-content {
+  margin-bottom: 0;
+  display: inline;
+}
+
+/* Table styles */
+.article-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.5rem 0;
+  border: 1px solid #e5e7eb;
+}
+
+.article-content td, .article-content th {
+  border: 1px solid #e5e7eb;
+  padding: 0.75rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.article-content th {
+  background-color: #f9fafb;
+  font-weight: bold;
+}
+
+.article-content td p {
+  margin-bottom: 0;
+}
+
+.article-content colgroup {
+  border: none;
+}
+
+/* BlockNote table cell colors */
+.article-content td[data-text-color="red"] {
+  color: #dc2626 !important;
+}
+
+.article-content td[data-text-color="blue"] {
+  color: #2563eb !important;
+}
+
+.article-content td[data-text-color="green"] {
+  color: #16a34a !important;
+}
+
+.article-content td[data-text-color="yellow"] {
+  color: #ca8a04 !important;
+}
+
+.article-content td[data-text-color="purple"] {
+  color: #9333ea !important;
+}
+
+.article-content td[data-text-color="pink"] {
+  color: #db2777 !important;
+}
+
+.article-content td[data-text-color="orange"] {
+  color: #ea580c !important;
+}
+
+.article-content td[data-text-color="gray"] {
+  color: #6b7280 !important;
+}
+
+.article-content td[data-background-color="red"] {
+  background-color: #fef2f2 !important;
+}
+
+.article-content td[data-background-color="blue"] {
+  background-color: #eff6ff !important;
+}
+
+.article-content td[data-background-color="green"] {
+  background-color: #f0fdf4 !important;
+}
+
+.article-content td[data-background-color="yellow"] {
+  background-color: #fefce8 !important;
+}
+
+.article-content td[data-background-color="purple"] {
+  background-color: #faf5ff !important;
+}
+
+.article-content td[data-background-color="pink"] {
+  background-color: #fdf2f8 !important;
+}
+
+.article-content td[data-background-color="orange"] {
+  background-color: #fff7ed !important;
+}
+
+.article-content td[data-background-color="gray"] {
+  background-color: #f9fafb !important;
+}
+
+.article-content a {
+  color: #2563eb;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.article-content a:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
