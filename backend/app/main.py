@@ -4,6 +4,7 @@ from botocore.exceptions import EndpointConnectionError
 from fastapi.middleware.cors import CORSMiddleware
 from package.routers.auth.endpoint import router as auth_router
 from package.routers.articles.endpoint import router as articles_router
+from package.routers.upload.endpoint import router as upload_router
 
 
 app = FastAPI()
@@ -17,7 +18,7 @@ app.add_middleware(
 )
 
 # Include routers
-routers = [auth_router, articles_router]
+routers = [auth_router, articles_router, upload_router]
 for router in routers:
     app.include_router(router)
 

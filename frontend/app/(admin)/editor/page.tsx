@@ -4,6 +4,29 @@ import "@blocknote/core/fonts/inter.css";
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
+import "../../shared-blocknote.css";
+
+// Upload function for LocalStack S3
+async function uploadFile(file: File) {
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  const token = localStorage.getItem('access_token');
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/upload/image`, {
+    method: 'POST',
+    body: formData,
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  
+  if (!response.ok) {
+    throw new Error('Upload failed');
+  }
+  
+  const result = await response.json();
+  return result.url;
+}
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { articlesAPI } from "@/lib/api";
@@ -22,6 +45,7 @@ export default function ArticleEditor() {
       cellTextColor: true,
       headers: true,
     },
+    uploadFile,
   });
   const [markdownValue, setMarkdownValue] = useState("");
   const [showMarkdownModal, setShowMarkdownModal] = useState(false);

@@ -2,6 +2,8 @@ import { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import "@blocknote/mantine/style.css";
+import "../../../shared-blocknote.css";
 import "../article-content.css";
 
 interface Article {
@@ -109,8 +111,9 @@ export default async function BlogPostPage({
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-2xl mx-auto px-6 py-12">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-white rounded-lg shadow-sm p-8">
         <div className="mb-12">
           <Link href="/blog">
             <Button
@@ -149,7 +152,7 @@ export default async function BlogPostPage({
               </div>
             )}
           </header>
-          <div className="article-content">
+          <div className="article-content blocknote-content prose max-w-none">
             {article.html_content ? (
               <div
                 dangerouslySetInnerHTML={{
@@ -161,6 +164,7 @@ export default async function BlogPostPage({
             )}
           </div>
         </article>
+        </div>
       </div>
     </div>
   );
