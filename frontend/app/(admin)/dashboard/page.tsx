@@ -95,11 +95,10 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className="p-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Dashboard</h1>
-          <Button onClick={()=>router.push('/articles/editor')}>Create New Article</Button>
+          <Button onClick={()=>router.push('/editor')}>Create New Article</Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -209,7 +208,7 @@ export default function Dashboard() {
                   <div 
                     key={article.article_id} 
                     className="border p-4 rounded hover:shadow-md transition-shadow cursor-pointer" 
-                    onClick={()=>router.push(`/articles/editor?id=${article.article_id}`)}
+                    onClick={()=>router.push(`/editor?id=${article.article_id}`)}
                   >
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="font-semibold">{article.title}</h3>
@@ -240,7 +239,6 @@ export default function Dashboard() {
             )}
           </CardContent>
         </Card>
-      </div>
     </div>
   );
 }

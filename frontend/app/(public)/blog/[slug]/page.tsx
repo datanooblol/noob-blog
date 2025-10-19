@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import "../../article-content.css";
+import "../article-content.css";
 
 interface Article {
   article_id: string;

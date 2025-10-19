@@ -20,10 +20,7 @@ export default function LoginPage() {
     try {
       const response = await authAPI.login(email, password);
       console.log('Login successful:', response);
-      // Store the token
       localStorage.setItem('access_token', response.access_token);
-      
-      // Redirect to dashboard (we'll create this next)
       router.push('/dashboard'); 
       alert('Login successful!');
     } catch (error) {
@@ -40,7 +37,6 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email Field */}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -51,8 +47,6 @@ export default function LoginPage() {
                 required
               />
             </div>
-
-            {/* Password Field */}
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
@@ -74,8 +68,6 @@ export default function LoginPage() {
                 </Button>
               </div>
             </div>
-
-            {/* Submit Button */}
             <Button type="submit" className="w-full">
               Login
             </Button>

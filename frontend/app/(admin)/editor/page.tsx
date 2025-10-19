@@ -155,7 +155,7 @@ export default function ArticleEditor() {
       } else {
         const newArticle = await articlesAPI.create(payload);
         alert("Created successfully!");
-        router.push(`/articles/editor?id=${newArticle.article_id}`);
+        router.push(`/editor?id=${newArticle.article_id}`);
       }
 
       setLastSavedContent(JSON.stringify(content));
@@ -232,141 +232,153 @@ export default function ArticleEditor() {
     }
   }, [articleId, editor, loadArticle]);
 
+  // Warn before leaving page with unsaved changes
+  useEffect(() => {
+    // Expose unsaved changes state to window for admin layout
+    (window as any).hasUnsavedChanges = hasUnsavedChanges;
+    
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        return 'You have unsaved changes. Are you sure you want to leave?';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      (window as any).hasUnsavedChanges = false;
+    };
+  }, [hasUnsavedChanges]);
+
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow-sm p-8">
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={handleBackToDashboard}
-                className="px-3 py-1 text-gray-600 hover:text-gray-800"
-              >
-                ← Back to Dashboard
-              </button>
-              <h1 className="text-2xl font-bold">Article Editor</h1>
-              {hasUnsavedChanges && (
-                <span className="text-sm text-orange-600 font-medium">
-                  • Unsaved changes
-                </span>
-              )}
-            </div>
-            <div className="flex gap-2 items-center">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">Status:</span>
-                <select
-                  value={status}
-                  onChange={(e) => handleStatusChange(e.target.value)}
-                  className="px-3 py-1 border border-gray-300 rounded text-sm capitalize"
-                >
-                  <option value="draft">Draft</option>
-                  <option value="published">Published</option>
-                  <option value="archived">Archived</option>
-                </select>
-              </div>
-              <button
-                onClick={() => setShowMarkdownModal(true)}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                Import Markdown
-              </button>
-              <button
-                onClick={handleSave}
-                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-              >
-                Save
-              </button>
-            </div>
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="bg-white rounded-lg shadow-sm p-8">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-bold">Article Editor</h1>
+            {hasUnsavedChanges && (
+              <span className="text-sm text-orange-600 font-medium">
+                • Unsaved changes
+              </span>
+            )}
           </div>
-
-          <div className="mb-6">
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter your article title..."
-              className="w-full text-4xl font-bold border-none p-0 focus:outline-none placeholder:text-gray-400 mb-4"
-            />
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <span>URL:</span>
-                <span className="text-gray-400">/blog/</span>
-                <input
-                  type="text"
-                  value={slug}
-                  onChange={(e) => setSlug(e.target.value)}
-                  placeholder="article-slug"
-                  className="text-sm border-none p-0 focus:outline-none bg-transparent"
-                />
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-gray-600">Redirect to:</span>
-                <input
-                  type="url"
-                  value={redirectUrl}
-                  onChange={(e) => setRedirectUrl(e.target.value)}
-                  placeholder="https://example.com/new-location (optional)"
-                  className="flex-1 text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500"
-                />
-                {redirectUrl && (
-                  <button
-                    onClick={() => setRedirectUrl("")}
-                    className="text-red-500 hover:text-red-700 text-sm"
-                  >
-                    Clear
-                  </button>
-                )}
-              </div>
-              {redirectUrl && (
-                <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
-                  ℹ️ Visitors to this article will be redirected to the URL
-                  above (301 redirect)
-                </div>
-              )}
+          <div className="flex gap-2 items-center">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">Status:</span>
+              <select
+                value={status}
+                onChange={(e) => handleStatusChange(e.target.value)}
+                className="px-3 py-1 border border-gray-300 rounded text-sm capitalize"
+              >
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+                <option value="archived">Archived</option>
+              </select>
             </div>
+            <button
+              onClick={() => setShowMarkdownModal(true)}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Import Markdown
+            </button>
+            <button
+              onClick={handleSave}
+              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+            >
+              Save
+            </button>
           </div>
+        </div>
 
-          {/* Tags Section */}
-          <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
-            <h3 className="text-sm font-medium text-gray-700 mb-3">Tags</h3>
-            <div className="flex flex-wrap gap-2 mb-3">
-              {tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-2"
-                >
-                  {tag}
-                  <button
-                    onClick={() => removeTag(tag)}
-                    className="text-blue-600 hover:text-blue-800 font-bold"
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-            <div className="flex gap-2">
+        <div className="mb-6">
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Enter your article title..."
+            className="w-full text-4xl font-bold border-none p-0 focus:outline-none placeholder:text-gray-400 mb-4"
+          />
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <span>URL:</span>
+              <span className="text-gray-400">/blog/</span>
               <input
                 type="text"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyPress={handleTagKeyPress}
-                placeholder="Add a tag (press Enter)"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                value={slug}
+                onChange={(e) => setSlug(e.target.value)}
+                placeholder="article-slug"
+                className="text-sm border-none p-0 focus:outline-none bg-transparent"
               />
-              <button
-                onClick={addTag}
-                disabled={!tagInput.trim()}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
-              >
-                Add Tag
-              </button>
             </div>
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-gray-600">Redirect to:</span>
+              <input
+                type="url"
+                value={redirectUrl}
+                onChange={(e) => setRedirectUrl(e.target.value)}
+                placeholder="https://example.com/new-location (optional)"
+                className="flex-1 text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500"
+              />
+              {redirectUrl && (
+                <button
+                  onClick={() => setRedirectUrl("")}
+                  className="text-red-500 hover:text-red-700 text-sm"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            {redirectUrl && (
+              <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
+                ℹ️ Visitors to this article will be redirected to the URL above
+                (301 redirect)
+              </div>
+            )}
           </div>
+        </div>
 
-          <div className="prose max-w-none">
-            {editor && <BlockNoteView editor={editor} editable={true} />}
+        {/* Tags Section */}
+        <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+          <h3 className="text-sm font-medium text-gray-700 mb-3">Tags</h3>
+          <div className="flex flex-wrap gap-2 mb-3">
+            {tags.map((tag) => (
+              <span
+                key={tag}
+                className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-2"
+              >
+                {tag}
+                <button
+                  onClick={() => removeTag(tag)}
+                  className="text-blue-600 hover:text-blue-800 font-bold"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
           </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyPress={handleTagKeyPress}
+              placeholder="Add a tag (press Enter)"
+              className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+            />
+            <button
+              onClick={addTag}
+              disabled={!tagInput.trim()}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+            >
+              Add Tag
+            </button>
+          </div>
+        </div>
+
+        <div className="prose max-w-none">
+          {editor && <BlockNoteView editor={editor} editable={true} />}
         </div>
       </div>
 
