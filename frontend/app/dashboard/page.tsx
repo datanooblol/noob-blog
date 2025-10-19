@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { articlesAPI } from '@/lib/api';
@@ -23,6 +23,10 @@ export default function Dashboard() {
   const router = useRouter();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [allTags, setAllTags] = useState<string[]>([]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -42,20 +46,53 @@ export default function Dashboard() {
 
   const statusCounts = getStatusCounts();
 
-  useEffect(() => {
-    loadArticles();
-  }, []);
-
-  const loadArticles = async () => {
+  const loadAllTags = useCallback(async () => {
     try {
       const data = await articlesAPI.getMy();
+      const uniqueTags = [...new Set(data.flatMap((article: Article) => article.tags || []))].sort();
+      setAllTags(uniqueTags);
+      console.log('[DASHBOARD] All tags loaded:', uniqueTags);
+    } catch (error) {
+      console.error('[DASHBOARD] Failed to load tags:', error);
+    }
+  }, []);
+
+  const loadArticles = useCallback(async () => {
+    console.log('[DASHBOARD] Loading articles with:', { search, statusFilter, selectedTags });
+    try {
+      setLoading(true);
+      const tags = selectedTags.length > 0 ? selectedTags : undefined;
+      const searchParam = search.trim() || undefined;
+      const data = await articlesAPI.getMy(statusFilter || undefined, searchParam, tags);
+      console.log('[DASHBOARD] Articles loaded:', data.length, 'articles');
       setArticles(data);
     } catch (error) {
-      console.error('Failed to load articles:', error);
+      console.error('[DASHBOARD] Failed to load articles:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [search, statusFilter, selectedTags]);
+
+  // Debounce search to reduce API calls
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      loadArticles();
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [search]);
+
+  // Load immediately for status and tag changes
+  useEffect(() => {
+    loadArticles();
+  }, [statusFilter, selectedTags]);
+
+  // Initial load
+  useEffect(() => {
+    loadAllTags();
+    if (!search && !statusFilter && selectedTags.length === 0) {
+      loadArticles();
+    }
+  }, []);
 
   return (
     <div className="p-8">
@@ -106,12 +143,66 @@ export default function Dashboard() {
         <Card>
           <CardHeader>
             <CardTitle>My Articles</CardTitle>
+            <div className="space-y-4 mt-4">
+              <div className="flex gap-4">
+                <input
+                  type="text"
+                  placeholder="Search articles..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                />
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                >
+                  <option value="">All Status</option>
+                  <option value="published">Published</option>
+                  <option value="draft">Draft</option>
+                  <option value="archived">Archived</option>
+                </select>
+                <select
+                  value=""
+                  onChange={(e) => {
+                    const tag = e.target.value;
+                    if (tag && !selectedTags.includes(tag)) {
+                      setSelectedTags([...selectedTags, tag]);
+                    }
+                  }}
+                  className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                >
+                  <option value="">+ Add Tag Filter</option>
+                  {allTags.filter(tag => !selectedTags.includes(tag)).map(tag => (
+                    <option key={tag} value={tag}>{tag}</option>
+                  ))}
+                </select>
+              </div>
+              {selectedTags.length > 0 && (
+                <div className="flex gap-2 flex-wrap">
+                  {selectedTags.map(tag => (
+                    <span
+                      key={tag}
+                      className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                    >
+                      {tag}
+                      <button
+                        onClick={() => setSelectedTags(selectedTags.filter(t => t !== tag))}
+                        className="hover:bg-blue-200 rounded-full w-4 h-4 flex items-center justify-center text-xs"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             {loading ? (
               <p>Loading articles...</p>
             ) : articles.length === 0 ? (
-              <p>No articles yet. Create your first article!</p>
+              <p>{search || statusFilter || selectedTags.length > 0 ? 'No articles match your filters.' : 'No articles yet. Create your first article!'}</p>
             ) : (
               <div className="space-y-4">
                 {articles.map((article: Article) => (
@@ -133,6 +224,15 @@ export default function Dashboard() {
                       <p className="text-sm text-green-600">
                         Published: {new Date(article.published_at).toLocaleDateString()}
                       </p>
+                    )}
+                    {article.tags && article.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {article.tags.map(tag => (
+                          <span key={tag} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
                     )}
                   </div>
                 ))}

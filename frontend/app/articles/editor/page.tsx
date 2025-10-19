@@ -7,6 +7,7 @@ import "@blocknote/mantine/style.css";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { articlesAPI } from "@/lib/api";
+import "./editor-styles.css";
 
 export default function ArticleEditor() {
   const searchParams = useSearchParams();
@@ -70,22 +71,25 @@ export default function ArticleEditor() {
         article.content.length > 0
       ) {
         try {
-          console.log('Loading JSON blocks:', article.content);
+          console.log("Loading JSON blocks:", article.content);
           editor.replaceBlocks(editor.document, article.content);
           setLastSavedContent(JSON.stringify(article.content));
-          console.log('JSON blocks loaded successfully');
+          console.log("JSON blocks loaded successfully");
         } catch (error) {
-          console.log('JSON blocks failed, trying HTML fallback:', error);
+          console.log("JSON blocks failed, trying HTML fallback:", error);
           if (article.html_content) {
             try {
-              console.log('HTML content:', article.html_content);
+              console.log("HTML content:", article.html_content);
               const blocks = editor.tryParseHTMLToBlocks(article.html_content);
-              console.log('Parsed HTML to blocks:', blocks);
+              console.log("Parsed HTML to blocks:", blocks);
               editor.replaceBlocks(editor.document, blocks);
               setLastSavedContent(JSON.stringify(blocks));
               console.log("Using HTML fallback");
             } catch (htmlError) {
-              console.error("Failed to load both JSON and HTML content:", htmlError);
+              console.error(
+                "Failed to load both JSON and HTML content:",
+                htmlError
+              );
             }
           }
         }
@@ -135,7 +139,15 @@ export default function ArticleEditor() {
     try {
       const content = editor.document;
       const html_content = await editor.blocksToHTMLLossy(content);
-      const payload = { title, slug, content, html_content, status, redirect_url: redirectUrl, tags };
+      const payload = {
+        title,
+        slug,
+        content,
+        html_content,
+        status,
+        redirect_url: redirectUrl,
+        tags,
+      };
 
       if (isEditMode && articleId) {
         await articlesAPI.update(articleId, payload);
@@ -152,7 +164,17 @@ export default function ArticleEditor() {
       console.error("Save error:", error);
       alert("Save failed");
     }
-  }, [editor, articleId, isEditMode, title, slug, status, redirectUrl, tags, router]);
+  }, [
+    editor,
+    articleId,
+    isEditMode,
+    title,
+    slug,
+    status,
+    redirectUrl,
+    tags,
+    router,
+  ]);
 
   const handleBackToDashboard = useCallback(() => {
     if (hasUnsavedChanges) {
@@ -179,16 +201,22 @@ export default function ArticleEditor() {
     }
   }, [tagInput, tags]);
 
-  const removeTag = useCallback((tagToRemove: string) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
-  }, [tags]);
+  const removeTag = useCallback(
+    (tagToRemove: string) => {
+      setTags(tags.filter((tag) => tag !== tagToRemove));
+    },
+    [tags]
+  );
 
-  const handleTagKeyPress = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addTag();
-    }
-  }, [addTag]);
+  const handleTagKeyPress = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        addTag();
+      }
+    },
+    [addTag]
+  );
 
   // Track title/slug/redirect/tags changes
   useEffect(() => {
@@ -291,7 +319,8 @@ export default function ArticleEditor() {
               </div>
               {redirectUrl && (
                 <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
-                  ℹ️ Visitors to this article will be redirected to the URL above (301 redirect)
+                  ℹ️ Visitors to this article will be redirected to the URL
+                  above (301 redirect)
                 </div>
               )}
             </div>

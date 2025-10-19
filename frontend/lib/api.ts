@@ -56,12 +56,18 @@ export const authAPI = {
 
 // Articles endpoints
 export const articlesAPI = {
-  getAll: async () => {
-    const response = await api.get("/articles/");
+  getAll: async (search?: string, tags?: string[]) => {
+    const params: any = {};
+    if (search) params.search = search;
+    if (tags?.length) params.tags = tags.join(',');
+    const response = await api.get("/articles/", { params });
     return response.data;
   },
-  getMy: async (status?: string) => {
-    const params = status ? { status } : {};
+  getMy: async (status?: string, search?: string, tags?: string[]) => {
+    const params: any = {};
+    if (status) params.status = status;
+    if (search) params.search = search;
+    if (tags?.length) params.tags = tags.join(',');
     const response = await api.get("/articles/my", { params });
     return response.data;
   },

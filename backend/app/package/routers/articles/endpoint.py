@@ -40,16 +40,22 @@ def create_article(
     return article
 
 @router.get("/", response_model=List[ArticleListResponse])
-def get_published_articles():
-    """Get all published articles"""
-    return get_all_published_articles()
+def get_published_articles(
+    search: Optional[str] = None,
+    tags: Optional[str] = None
+):
+    """Get all published articles with optional search and tag filtering"""
+    tag_list = tags.split(',') if tags else None
+    return get_all_published_articles(search, tag_list)
 
 @router.get("/my", response_model=List[ArticleListResponse])
 def get_my_articles(
     status: Optional[str] = None,
+    search: Optional[str] = None,
+    tags: Optional[str] = None,
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ):
-    """Get creator's articles with optional status filter"""
+    """Get creator's articles with optional filters"""
     user_id = get_user_id_from_token(credentials.credentials)
     if not user_id:
         raise HTTPException(
@@ -57,7 +63,8 @@ def get_my_articles(
             detail="Invalid token"
         )
     
-    articles = get_creator_articles(user_id, status)
+    tag_list = tags.split(',') if tags else None
+    articles = get_creator_articles(user_id, status, search, tag_list)
     return articles
 
 @router.get("/slug/{slug}", response_model=ArticleResponse)

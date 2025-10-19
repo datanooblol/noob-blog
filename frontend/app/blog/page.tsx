@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+
 import { articlesAPI } from "@/lib/api";
 import Link from "next/link";
 
@@ -18,21 +20,51 @@ interface Article {
 export default function BlogPage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTag, setSelectedTag] = useState<string>("");
+  const [allTags, setAllTags] = useState<string[]>([]);
 
-  useEffect(() => {
-    loadPublishedArticles();
-  }, []);
-
-  const loadPublishedArticles = async () => {
+  const loadPublishedArticles = useCallback(async () => {
+    console.log('[BLOG] Loading articles with:', { searchTerm, selectedTag });
     try {
-      const data = await articlesAPI.getAll();
+      setLoading(true);
+      const data = await articlesAPI.getAll(
+        searchTerm || undefined,
+        selectedTag ? [selectedTag] : undefined
+      );
+      console.log('[BLOG] Articles loaded:', data.length, 'articles');
       setArticles(data);
+      
+      // Extract unique tags
+      const tags = [...new Set(data.flatMap(article => article.tags))].sort();
+      setAllTags(tags);
+      console.log('[BLOG] Tags extracted:', tags);
     } catch (error) {
-      console.error("Failed to load articles:", error);
+      console.error("[BLOG] Failed to load articles:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchTerm, selectedTag]);
+
+  // Initial load
+  useEffect(() => {
+    if (!searchTerm && !selectedTag) {
+      loadPublishedArticles();
+    }
+  }, []);
+
+  // Debounced search
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      loadPublishedArticles();
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm]);
+
+  // Immediate tag filter
+  useEffect(() => {
+    loadPublishedArticles();
+  }, [selectedTag]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -40,6 +72,30 @@ export default function BlogPage() {
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Blog</h1>
           <p className="text-gray-600">Latest articles and thoughts</p>
+        </div>
+
+        {/* Search and Filter */}
+        <div className="mb-8 space-y-4">
+          <div className="flex gap-4 flex-col sm:flex-row">
+            <Input
+              placeholder="Search articles..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-1"
+            />
+            <select
+              value={selectedTag}
+              onChange={(e) => setSelectedTag(e.target.value)}
+              className="w-full sm:w-48 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All tags</option>
+              {allTags.map((tag) => (
+                <option key={tag} value={tag}>
+                  {tag}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {loading ? (

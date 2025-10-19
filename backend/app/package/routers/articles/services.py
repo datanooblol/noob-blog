@@ -65,9 +65,41 @@ def get_article_by_slug_service(slug: str) -> Optional[ArticleResponse]:
         return ArticleResponse(**article)
     return None
 
-def get_all_published_articles() -> List[ArticleListResponse]:
-    """Get all published articles"""
+def get_all_published_articles(search: Optional[str] = None, tags: Optional[List[str]] = None) -> List[ArticleListResponse]:
+    """Get all published articles with optional filtering"""
     articles = get_published_articles()
+    
+    # Apply filters
+    if search:
+        search_lower = search.lower()
+        filtered_articles = []
+        for a in articles:
+            try:
+                # Check title
+                if search_lower in a.get('title', '').lower():
+                    filtered_articles.append(a)
+                    continue
+                
+                # Check content (handle both string and object content)
+                content = a.get('content', '')
+                if isinstance(content, str) and search_lower in content.lower():
+                    filtered_articles.append(a)
+                    continue
+                
+                # Check tags
+                tags_list = a.get('tags', [])
+                if isinstance(tags_list, list) and any(search_lower in tag.lower() for tag in tags_list if isinstance(tag, str)):
+                    filtered_articles.append(a)
+            except Exception as e:
+                print(f"Error filtering article {a.get('article_id', 'unknown')}: {e}")
+                continue
+        articles = filtered_articles
+    
+    if tags:
+        articles = [a for a in articles if 
+                   isinstance(a.get('tags', []), list) and 
+                   any(tag in a.get('tags', []) for tag in tags)]
+    
     return [ArticleListResponse(**article) for article in articles]
 
 def update_existing_article(article_id: str, article_data, creator_id: str) -> Optional[ArticleResponse]:
@@ -119,9 +151,41 @@ def delete_user_article(article_id: str, creator_id: str) -> bool:
     
     return delete_article(article_id)
 
-def get_creator_articles(creator_id: str, status: Optional[str] = None) -> List[ArticleListResponse]:
-    """Get articles by creator with optional status filter"""
+def get_creator_articles(creator_id: str, status: Optional[str] = None, search: Optional[str] = None, tags: Optional[List[str]] = None) -> List[ArticleListResponse]:
+    """Get articles by creator with optional filters"""
     articles = get_user_articles(creator_id, status)
+    
+    # Apply filters
+    if search:
+        search_lower = search.lower()
+        filtered_articles = []
+        for a in articles:
+            try:
+                # Check title
+                if search_lower in a.get('title', '').lower():
+                    filtered_articles.append(a)
+                    continue
+                
+                # Check content (handle both string and object content)
+                content = a.get('content', '')
+                if isinstance(content, str) and search_lower in content.lower():
+                    filtered_articles.append(a)
+                    continue
+                
+                # Check tags
+                tags_list = a.get('tags', [])
+                if isinstance(tags_list, list) and any(search_lower in tag.lower() for tag in tags_list if isinstance(tag, str)):
+                    filtered_articles.append(a)
+            except Exception as e:
+                print(f"Error filtering article {a.get('article_id', 'unknown')}: {e}")
+                continue
+        articles = filtered_articles
+    
+    if tags:
+        articles = [a for a in articles if 
+                   isinstance(a.get('tags', []), list) and 
+                   any(tag in a.get('tags', []) for tag in tags)]
+    
     return [ArticleListResponse(**article) for article in articles]
 
 def publish_article(article_id: str, creator_id: str) -> bool:
