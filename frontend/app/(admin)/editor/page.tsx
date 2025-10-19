@@ -33,7 +33,7 @@ export default function ArticleEditor() {
   const [tagInput, setTagInput] = useState("");
   const [seoDescription, setSeoDescription] = useState("");
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [lastSavedContent, setLastSavedContent] = useState(null);
+  // const [lastSavedContent, setLastSavedContent] = useState<string | null>(null);
 
   const handleMarkdownSave = useCallback(async () => {
     const blocks = await editor.tryParseMarkdownToBlocks(markdownValue);
@@ -75,7 +75,7 @@ export default function ArticleEditor() {
         try {
           console.log("Loading JSON blocks:", article.content);
           editor.replaceBlocks(editor.document, article.content);
-          setLastSavedContent(JSON.stringify(article.content));
+          // setLastSavedContent(JSON.stringify(article.content));
           console.log("JSON blocks loaded successfully");
         } catch (error) {
           console.log("JSON blocks failed, trying HTML fallback:", error);
@@ -85,7 +85,7 @@ export default function ArticleEditor() {
               const blocks = editor.tryParseHTMLToBlocks(article.html_content);
               console.log("Parsed HTML to blocks:", blocks);
               editor.replaceBlocks(editor.document, blocks);
-              setLastSavedContent(JSON.stringify(blocks));
+              // setLastSavedContent(JSON.stringify(blocks));
               console.log("Using HTML fallback");
             } catch (htmlError) {
               console.error(
@@ -115,7 +115,7 @@ export default function ArticleEditor() {
         const content = editor.document;
         const html_content = await editor.blocksToHTMLLossy(content);
 
-        await articlesAPI.update(articleId, {
+        await articlesAPI.update(articleId!, {
           title,
           slug,
           content,
@@ -162,7 +162,7 @@ export default function ArticleEditor() {
         router.push(`/editor?id=${newArticle.article_id}`);
       }
 
-      setLastSavedContent(JSON.stringify(content));
+      // setLastSavedContent(JSON.stringify(content));
       setHasUnsavedChanges(false);
     } catch (error) {
       console.error("Save error:", error);
@@ -240,7 +240,7 @@ export default function ArticleEditor() {
   // Warn before leaving page with unsaved changes
   useEffect(() => {
     // Expose unsaved changes state to window for admin layout
-    (window as any).hasUnsavedChanges = hasUnsavedChanges;
+    (window as unknown as { hasUnsavedChanges: boolean }).hasUnsavedChanges = hasUnsavedChanges;
     
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasUnsavedChanges) {
@@ -253,7 +253,7 @@ export default function ArticleEditor() {
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      (window as any).hasUnsavedChanges = false;
+      (window as unknown as { hasUnsavedChanges: boolean }).hasUnsavedChanges = false;
     };
   }, [hasUnsavedChanges]);
 

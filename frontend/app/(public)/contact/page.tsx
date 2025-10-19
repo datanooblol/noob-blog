@@ -8,9 +8,9 @@ export default function ContactPage() {
         
         <div className="grid md:grid-cols-2 gap-8">
           <div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Let's Connect</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Let&apos;s Connect</h2>
             <p className="text-gray-700 mb-6">
-              I'd love to hear from you! Whether you have questions about my blog posts, 
+              I&apos;d love to hear from you! Whether you have questions about my blog posts, 
               want to collaborate on a project, or just want to say hello.
             </p>
             

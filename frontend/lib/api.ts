@@ -31,6 +31,7 @@ interface ArticleData {
   title: string;
   slug?: string;
   content: object[]; // BlockNote content array
+  html_content?: string;
   tags?: string[];
   seo_description?: string;
   cover_image?: string;
@@ -57,14 +58,14 @@ export const authAPI = {
 // Articles endpoints
 export const articlesAPI = {
   getAll: async (search?: string, tags?: string[]) => {
-    const params: any = {};
+    const params: Record<string, string> = {};
     if (search) params.search = search;
     if (tags?.length) params.tags = tags.join(',');
     const response = await api.get("/articles/", { params });
     return response.data;
   },
   getMy: async (status?: string, search?: string, tags?: string[]) => {
-    const params: any = {};
+    const params: Record<string, string> = {};
     if (status) params.status = status;
     if (search) params.search = search;
     if (tags?.length) params.tags = tags.join(',');

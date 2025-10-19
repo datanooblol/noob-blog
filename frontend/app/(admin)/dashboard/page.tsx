@@ -49,7 +49,7 @@ export default function Dashboard() {
   const loadAllTags = useCallback(async () => {
     try {
       const data = await articlesAPI.getMy();
-      const uniqueTags = [...new Set(data.flatMap((article: Article) => article.tags || []))].sort();
+      const uniqueTags = [...new Set(data.flatMap((article: Article) => article.tags || []))].sort() as string[];
       setAllTags(uniqueTags);
       console.log('[DASHBOARD] All tags loaded:', uniqueTags);
     } catch (error) {

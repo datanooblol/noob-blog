@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -26,7 +25,7 @@ export default function AdminLayout({
   }, [router]);
 
   const handleNavigation = (href: string) => {
-    if (isEditorPage && (window as any).hasUnsavedChanges) {
+    if (isEditorPage && (window as unknown as { hasUnsavedChanges: boolean }).hasUnsavedChanges) {
       const shouldSave = confirm('You have unsaved changes. Do you want to save before leaving?');
       if (shouldSave) {
         return;
@@ -36,7 +35,7 @@ export default function AdminLayout({
   };
 
   const handleLogout = () => {
-    if (isEditorPage && (window as any).hasUnsavedChanges) {
+    if (isEditorPage && (window as unknown as { hasUnsavedChanges: boolean }).hasUnsavedChanges) {
       const shouldSave = confirm('You have unsaved changes. Do you want to save before leaving?');
       if (shouldSave) {
         return;

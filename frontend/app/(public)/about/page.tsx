@@ -6,7 +6,7 @@ export default function AboutPage() {
         
         <div className="prose prose-lg max-w-none">
           <p className="text-xl text-gray-600 mb-6">
-            Welcome! I'm a passionate developer sharing my journey through technology, 
+            Welcome! I&apos;m a passionate developer sharing my journey through technology, 
             coding experiences, and life lessons learned along the way.
           </p>
           

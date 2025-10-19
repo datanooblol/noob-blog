@@ -26,7 +26,7 @@ export default function BlogPage() {
   const loadAllTags = useCallback(async () => {
     try {
       const data = await articlesAPI.getAll();
-      const tags = [...new Set(data.flatMap(article => article.tags))].sort();
+      const tags = [...new Set(data.flatMap((article: Article) => article.tags))].sort() as string[];
       setAllTags(tags);
       console.log('[BLOG] All tags loaded:', tags);
     } catch (error) {
