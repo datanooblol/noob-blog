@@ -31,6 +31,7 @@ export default function ArticleEditor() {
   const [redirectUrl, setRedirectUrl] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
+  const [seoDescription, setSeoDescription] = useState("");
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [lastSavedContent, setLastSavedContent] = useState(null);
 
@@ -64,6 +65,7 @@ export default function ArticleEditor() {
       setStatus(article.status || "draft");
       setRedirectUrl(article.redirect_url || "");
       setTags(article.tags || []);
+      setSeoDescription(article.seo_description || "");
 
       if (
         article.content &&
@@ -121,6 +123,7 @@ export default function ArticleEditor() {
           status: newStatus,
           redirect_url: redirectUrl,
           tags,
+          seo_description: seoDescription,
         });
 
         setStatus(newStatus);
@@ -130,7 +133,7 @@ export default function ArticleEditor() {
         alert("Status change failed");
       }
     },
-    [editor, articleId, title, slug, status, redirectUrl, tags]
+    [editor, articleId, title, slug, status, redirectUrl, tags, seoDescription]
   );
 
   const handleSave = useCallback(async () => {
@@ -147,6 +150,7 @@ export default function ArticleEditor() {
         status,
         redirect_url: redirectUrl,
         tags,
+        seo_description: seoDescription,
       };
 
       if (isEditMode && articleId) {
@@ -173,6 +177,7 @@ export default function ArticleEditor() {
     status,
     redirectUrl,
     tags,
+    seoDescription,
     router,
   ]);
 
@@ -218,12 +223,12 @@ export default function ArticleEditor() {
     [addTag]
   );
 
-  // Track title/slug/redirect/tags changes
+  // Track title/slug/redirect/tags/seo changes
   useEffect(() => {
-    if (title || slug || redirectUrl || tags.length > 0) {
+    if (title || slug || redirectUrl || tags.length > 0 || seoDescription) {
       setHasUnsavedChanges(true);
     }
-  }, [title, slug, redirectUrl, tags]);
+  }, [title, slug, redirectUrl, tags, seoDescription]);
 
   // Load article content on mount
   useEffect(() => {
@@ -336,6 +341,27 @@ export default function ArticleEditor() {
                 (301 redirect)
               </div>
             )}
+          </div>
+        </div>
+
+        {/* SEO Description Section */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            SEO Description
+          </label>
+          <textarea
+            value={seoDescription}
+            onChange={(e) => setSeoDescription(e.target.value)}
+            placeholder="Brief description for search engines and social media (150-160 characters recommended)..."
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500 resize-none"
+            rows={3}
+            maxLength={200}
+          />
+          <div className="flex justify-between text-xs text-gray-500 mt-1">
+            <span>Used for search results and social media previews</span>
+            <span className={seoDescription.length > 160 ? 'text-orange-600' : ''}>
+              {seoDescription.length}/160 characters
+            </span>
           </div>
         </div>
 

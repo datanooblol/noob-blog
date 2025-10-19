@@ -13,14 +13,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Your Blog - Thoughts, Experiences & Insights",
+  title: {
+    default: "datanooblol",
+    template: "%s | datanooblol",
+  },
   description: "Personal blog sharing thoughts, experiences, and insights about technology, development, and life.",
   keywords: "blog, technology, development, programming, personal",
-  authors: [{ name: "Your Name" }],
+  robots: "index, follow",
   openGraph: {
-    title: "Your Blog - Thoughts, Experiences & Insights",
-    description: "Personal blog sharing thoughts, experiences, and insights about technology, development, and life.",
+    siteName: "datanooblol",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
   },
 };
 

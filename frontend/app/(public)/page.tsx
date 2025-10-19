@@ -1,5 +1,24 @@
 import Link from "next/link";
 import FeatureCard from "@/components/FeatureCard";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "datanooblol - Personal Blog",
+  description: "Welcome to my personal blog where I share thoughts, experiences, and insights about technology, development, and life.",
+  keywords: "blog, technology, development, programming, personal",
+  robots: "index, follow",
+  openGraph: {
+    title: "datanooblol - Personal Blog",
+    description: "Welcome to my personal blog where I share thoughts, experiences, and insights about technology, development, and life.",
+    type: "website",
+    siteName: "datanooblol",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "datanooblol - Personal Blog",
+    description: "Welcome to my personal blog where I share thoughts, experiences, and insights about technology, development, and life.",
+  },
+};
 
 export default function HomePage() {
   return (

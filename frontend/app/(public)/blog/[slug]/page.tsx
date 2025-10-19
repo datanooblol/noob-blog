@@ -24,7 +24,7 @@ interface Article {
 async function getArticle(slug: string): Promise<Article | null> {
   try {
     const response = await fetch(
-      `http://localhost:8001/articles/slug/${slug}`,
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/articles/slug/${slug}`,
       {
         cache: "no-store",
       }
@@ -59,23 +59,34 @@ export async function generateMetadata({
     };
   }
 
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const canonicalUrl = `${baseUrl}/blog/${slug}`;
+  
   return {
     title: article.title,
     description: article.seo_description || `Read ${article.title} on our blog`,
-    keywords: article.tags.join(", "),
+    keywords: article.tags.length > 0 ? article.tags.join(", ") : "blog, article, technology",
+    robots: 'index, follow',
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
       title: article.title,
-      description:
-        article.seo_description || `Read ${article.title} on our blog`,
+      description: article.seo_description || `Read ${article.title} on our blog`,
       type: "article",
+      url: canonicalUrl,
       publishedTime: article.published_at,
       tags: article.tags,
+      siteName: 'datanooblol',
     },
     twitter: {
       card: "summary_large_image",
       title: article.title,
-      description:
-        article.seo_description || `Read ${article.title} on our blog`,
+      description: article.seo_description || `Read ${article.title} on our blog`,
+    },
+    other: {
+      'article:published_time': article.published_at,
+      'article:tag': article.tags,
     },
   };
 }
