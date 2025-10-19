@@ -21,34 +21,41 @@ export default function BlogPage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedTag, setSelectedTag] = useState<string>("");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [allTags, setAllTags] = useState<string[]>([]);
 
+  const loadAllTags = useCallback(async () => {
+    try {
+      const data = await articlesAPI.getAll();
+      const tags = [...new Set(data.flatMap(article => article.tags))].sort();
+      setAllTags(tags);
+      console.log('[BLOG] All tags loaded:', tags);
+    } catch (error) {
+      console.error("[BLOG] Failed to load tags:", error);
+    }
+  }, []);
+
   const loadPublishedArticles = useCallback(async () => {
-    console.log('[BLOG] Loading articles with:', { searchTerm, selectedTag });
+    console.log('[BLOG] Loading articles with:', { searchTerm, selectedTags });
     try {
       setLoading(true);
       const data = await articlesAPI.getAll(
         searchTerm || undefined,
-        selectedTag ? [selectedTag] : undefined
+        selectedTags.length > 0 ? selectedTags : undefined
       );
       console.log('[BLOG] Articles loaded:', data.length, 'articles');
       setArticles(data);
-      
-      // Extract unique tags
-      const tags = [...new Set(data.flatMap(article => article.tags))].sort();
-      setAllTags(tags);
-      console.log('[BLOG] Tags extracted:', tags);
     } catch (error) {
       console.error("[BLOG] Failed to load articles:", error);
     } finally {
       setLoading(false);
     }
-  }, [searchTerm, selectedTag]);
+  }, [searchTerm, selectedTags]);
 
   // Initial load
   useEffect(() => {
-    if (!searchTerm && !selectedTag) {
+    loadAllTags();
+    if (!searchTerm && selectedTags.length === 0) {
       loadPublishedArticles();
     }
   }, []);
@@ -64,7 +71,7 @@ export default function BlogPage() {
   // Immediate tag filter
   useEffect(() => {
     loadPublishedArticles();
-  }, [selectedTag]);
+  }, [selectedTags]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -84,25 +91,48 @@ export default function BlogPage() {
               className="flex-1"
             />
             <select
-              value={selectedTag}
-              onChange={(e) => setSelectedTag(e.target.value)}
+              value=""
+              onChange={(e) => {
+                const tag = e.target.value;
+                if (tag && !selectedTags.includes(tag)) {
+                  setSelectedTags([...selectedTags, tag]);
+                }
+              }}
               className="w-full sm:w-48 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">All tags</option>
-              {allTags.map((tag) => (
+              <option value="">+ Add Tag Filter</option>
+              {allTags.filter(tag => !selectedTags.includes(tag)).map((tag) => (
                 <option key={tag} value={tag}>
                   {tag}
                 </option>
               ))}
             </select>
           </div>
+          {selectedTags.length > 0 && (
+            <div className="flex gap-2 flex-wrap">
+              {selectedTags.map(tag => (
+                <span
+                  key={tag}
+                  className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                >
+                  {tag}
+                  <button
+                    onClick={() => setSelectedTags(selectedTags.filter(t => t !== tag))}
+                    className="hover:bg-blue-200 rounded-full w-4 h-4 flex items-center justify-center text-xs"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         {loading ? (
           <p className="text-center">Loading articles...</p>
         ) : articles.length === 0 ? (
           <p className="text-center text-gray-600">
-            No articles published yet.
+            {searchTerm || selectedTags.length > 0 ? 'No articles match your search.' : 'No articles published yet.'}
           </p>
         ) : (
           <div className="grid gap-6">
