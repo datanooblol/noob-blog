@@ -28,6 +28,8 @@ export default function ArticleEditor() {
   const [slug, setSlug] = useState("");
   const [status, setStatus] = useState("draft");
   const [redirectUrl, setRedirectUrl] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [lastSavedContent, setLastSavedContent] = useState(null);
 
@@ -60,6 +62,7 @@ export default function ArticleEditor() {
       setSlug(article.slug || generateSlug(article.title || ""));
       setStatus(article.status || "draft");
       setRedirectUrl(article.redirect_url || "");
+      setTags(article.tags || []);
 
       if (
         article.content &&
@@ -113,6 +116,7 @@ export default function ArticleEditor() {
           html_content,
           status: newStatus,
           redirect_url: redirectUrl,
+          tags,
         });
 
         setStatus(newStatus);
@@ -122,7 +126,7 @@ export default function ArticleEditor() {
         alert("Status change failed");
       }
     },
-    [editor, articleId, title, slug, status, redirectUrl]
+    [editor, articleId, title, slug, status, redirectUrl, tags]
   );
 
   const handleSave = useCallback(async () => {
@@ -131,7 +135,7 @@ export default function ArticleEditor() {
     try {
       const content = editor.document;
       const html_content = await editor.blocksToHTMLLossy(content);
-      const payload = { title, slug, content, html_content, status, redirect_url: redirectUrl };
+      const payload = { title, slug, content, html_content, status, redirect_url: redirectUrl, tags };
 
       if (isEditMode && articleId) {
         await articlesAPI.update(articleId, payload);
@@ -148,7 +152,7 @@ export default function ArticleEditor() {
       console.error("Save error:", error);
       alert("Save failed");
     }
-  }, [editor, articleId, isEditMode, title, slug, status, redirectUrl, router]);
+  }, [editor, articleId, isEditMode, title, slug, status, redirectUrl, tags, router]);
 
   const handleBackToDashboard = useCallback(() => {
     if (hasUnsavedChanges) {
@@ -167,12 +171,31 @@ export default function ArticleEditor() {
     }
   }, [hasUnsavedChanges, handleSave, router]);
 
-  // Track title/slug/redirect changes only
+  const addTag = useCallback(() => {
+    const trimmedTag = tagInput.trim();
+    if (trimmedTag && !tags.includes(trimmedTag)) {
+      setTags([...tags, trimmedTag]);
+      setTagInput("");
+    }
+  }, [tagInput, tags]);
+
+  const removeTag = useCallback((tagToRemove: string) => {
+    setTags(tags.filter(tag => tag !== tagToRemove));
+  }, [tags]);
+
+  const handleTagKeyPress = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addTag();
+    }
+  }, [addTag]);
+
+  // Track title/slug/redirect/tags changes
   useEffect(() => {
-    if (title || slug || redirectUrl) {
+    if (title || slug || redirectUrl || tags.length > 0) {
       setHasUnsavedChanges(true);
     }
-  }, [title, slug, redirectUrl]);
+  }, [title, slug, redirectUrl, tags]);
 
   // Load article content on mount
   useEffect(() => {
@@ -271,6 +294,44 @@ export default function ArticleEditor() {
                   ℹ️ Visitors to this article will be redirected to the URL above (301 redirect)
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Tags Section */}
+          <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+            <h3 className="text-sm font-medium text-gray-700 mb-3">Tags</h3>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                >
+                  {tag}
+                  <button
+                    onClick={() => removeTag(tag)}
+                    className="text-blue-600 hover:text-blue-800 font-bold"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyPress={handleTagKeyPress}
+                placeholder="Add a tag (press Enter)"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+              />
+              <button
+                onClick={addTag}
+                disabled={!tagInput.trim()}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+              >
+                Add Tag
+              </button>
             </div>
           </div>
 
