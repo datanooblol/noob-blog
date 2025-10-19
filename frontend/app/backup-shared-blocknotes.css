@@ -1,0 +1,40 @@
+.bn-drag-handle,
+.bn-side-menu {
+  position: absolute !important;
+  left: -28px !important;           /* small offset to the left of text */
+  top: 0 !important;
+  z-index: 10 !important;
+  width: 20px !important;           /* small clickable zone */
+  height: 20px !important;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+  pointer-events: auto !important;  /* allow clicking on handle */
+  cursor: grab !important;
+}
+
+/* Make sure only the icon itself reacts to clicks */
+.bn-drag-handle > *,
+.bn-side-menu > * {
+  pointer-events: auto !important;
+}
+
+/* When you hover, show clearer */
+.bn-drag-handle:hover,
+.bn-side-menu:hover {
+  opacity: 1;
+}
+
+/* ✅ Ensure text area remains fully interactive */
+.bn-editor,
+.bn-block-content,
+.bn-block {
+  position: relative !important;
+  pointer-events: auto !important;
+  z-index: 1 !important;
+}
+
+/* Prevent side handle area from overlapping typing zone */
+.bn-block-content {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}

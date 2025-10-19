@@ -1,234 +1,24 @@
-/* BlockNote base styles will be imported separately */
+/* Minimal shared styles for BlockNote */
 
-/* Shared styles for both editor and blog display */
+/* Basic content styling */
 .blocknote-content {
-  /* Typography */
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.6;
   color: #374151;
 }
 
-/* Paragraphs */
-.blocknote-content p {
-  margin: 1rem 0;
-  font-size: 1rem;
-}
-
-/* Headings */
-.blocknote-content h1 {
-  font-size: 2.25rem;
-  font-weight: 700;
-  margin: 2rem 0 1rem 0;
-  line-height: 1.2;
-}
-
-.blocknote-content h2 {
-  font-size: 1.875rem;
-  font-weight: 600;
-  margin: 1.5rem 0 1rem 0;
-  line-height: 1.3;
-}
-
-.blocknote-content h3 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin: 1.5rem 0 0.75rem 0;
-  line-height: 1.4;
-}
-
-/* Images - Default center alignment */
+/* Images */
 .blocknote-content img {
   max-width: 100%;
   height: auto;
   display: block;
   margin: 1.5rem auto;
   border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-/* Image alignment based on BlockNote data attributes */
-.blocknote-content img[data-text-alignment="left"],
-.bn-block-content[data-text-alignment="left"] img {
-  margin: 1.5rem 0 1.5rem 0 !important;
-}
-
-.blocknote-content img[data-text-alignment="center"],
-.bn-block-content[data-text-alignment="center"] img {
-  margin: 1.5rem auto !important;
-}
-
-.blocknote-content img[data-text-alignment="right"],
-.bn-block-content[data-text-alignment="right"] img {
-  margin: 1.5rem 0 1.5rem auto !important;
-}
-
-/* BlockNote wrapper alignment */
-.bn-block-content[data-text-alignment="left"] {
-  text-align: left;
-}
-
-.bn-block-content[data-text-alignment="center"] {
-  text-align: center;
-}
-
-.bn-block-content[data-text-alignment="right"] {
-  text-align: right;
-}
-
-/* Figure alignment based on data attributes */
-.blocknote-content figure {
-  margin: 1.5rem 0;
-  text-align: left; /* Default to left instead of center */
-}
-
-.blocknote-content figure img {
-  margin-left: 0; /* Default to left alignment */
-  margin-right: auto;
-}
-
-/* Explicit center alignment */
-.blocknote-content figure[data-text-alignment="center"] {
-  text-align: center;
-}
-
-.blocknote-content figure[data-text-alignment="center"] img {
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* Explicit right alignment */
-.blocknote-content figure[data-text-alignment="right"] {
-  text-align: right;
-}
-
-.blocknote-content figure[data-text-alignment="right"] img {
-  margin-left: auto;
-  margin-right: 0;
-}
-
-/* Left alignment (explicit, same as default) */
-.blocknote-content figure[data-text-alignment="left"] {
-  text-align: left;
-}
-
-.blocknote-content figure[data-text-alignment="left"] img {
-  margin-left: 0;
-  margin-right: auto;
-}
-
-.blocknote-content figcaption {
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
-  color: #6b7280;
-  font-style: italic;
-}
-
-/* Lists */
-.blocknote-content ul,
-.blocknote-content ol {
-  margin: 1rem 0;
-  padding-left: 1.5rem;
-}
-
-.blocknote-content li {
-  margin: 0.5rem 0;
-}
-
-/* Blockquotes */
-.blocknote-content blockquote {
-  border-left: 4px solid #e5e7eb;
-  padding-left: 1rem;
-  margin: 1.5rem 0;
-  font-style: italic;
-  color: #6b7280;
-}
-
-/* Code */
-.blocknote-content code {
-  background-color: #f3f4f6;
-  padding: 0.125rem 0.25rem;
-  border-radius: 0.25rem;
-  font-family: 'Courier New', monospace;
-  font-size: 0.875rem;
-}
-
-.blocknote-content pre {
-  background-color: #1f2937;
-  color: #f9fafb;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  overflow-x: auto;
-  margin: 1.5rem 0;
-}
-
-.blocknote-content pre code {
-  background-color: transparent;
-  padding: 0;
-  color: inherit;
-}
-
-/* Tables */
-.blocknote-content table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 1.5rem 0;
-}
-
-.blocknote-content th,
-.blocknote-content td {
-  border: 1px solid #e5e7eb;
-  padding: 0.75rem;
-  text-align: left;
-}
-
-.blocknote-content th {
-  background-color: #f9fafb;
-  font-weight: 600;
-}
-
-/* Links */
-.blocknote-content a {
-  color: #3b82f6;
-  text-decoration: underline;
-}
-
-.blocknote-content a:hover {
-  color: #1d4ed8;
-}
-
-/* Horizontal rules */
-.blocknote-content hr {
-  border: none;
-  border-top: 1px solid #e5e7eb;
-  margin: 2rem 0;
-}
-
-/* Fix BlockNote UI components */
+/* Fix menu z-index only */
 .bn-suggestion-menu,
 .bn-slash-menu,
-.bn-formatting-toolbar,
-.bn-side-menu,
-.mantine-Menu-dropdown,
-.mantine-Popover-dropdown {
+.bn-formatting-toolbar {
   z-index: 99999 !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  position: fixed !important;
-  min-width: 350px !important;
-  max-width: 400px !important;
-  max-height: 300px !important;
-  width: auto !important;
-}
-
-/* Make slash menu items wider and more readable */
-.bn-suggestion-menu-item,
-.mantine-Menu-item {
-  padding: 8px 12px !important;
-  line-height: 1.5 !important;
-}
-
-/* Ensure editor container doesn't clip menus */
-.prose {
-  overflow: visible !important;
-  position: static !important;
 }
