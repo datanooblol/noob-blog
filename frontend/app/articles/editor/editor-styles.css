@@ -1,0 +1,21 @@
+/* Link styling for BlockNote editor */
+.bn-editor a {
+  color: #2563eb !important;
+  text-decoration: underline !important;
+}
+
+.bn-editor a:hover {
+  color: #1d4ed8 !important;
+  text-decoration: underline !important;
+}
+
+/* More specific selector if needed */
+/* .bn-inline-content a {
+  color: #2563eb !important;
+  text-decoration: underline !important;
+}
+
+.bn-inline-content a:hover {
+  color: #1d4ed8 !important;
+  text-decoration: underline !important;
+} */

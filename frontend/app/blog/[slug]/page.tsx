@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import "../../article-content.css";
@@ -16,6 +16,7 @@ interface Article {
   html_content?: string;
   seo_description: string;
   tags: string[];
+  redirect_url?: string;
   created_at: string;
   published_at: string;
 }
@@ -89,6 +90,11 @@ export default async function BlogPostPage({
 
   if (!article) {
     notFound();
+  }
+
+  // Handle redirect if redirect_url is set
+  if (article.redirect_url) {
+    redirect(article.redirect_url);
   }
 
   return (

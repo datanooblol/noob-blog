@@ -41,6 +41,7 @@ def create_new_article(article_data: ArticleCreate, creator_id: str) -> Optional
         'creator_id': creator_id,
         'tags': article_data.tags or [],
         'seo_description': article_data.seo_description or '',
+        'redirect_url': article_data.redirect_url or '',
         'created_at': now,
         'updated_at': now,
         'published_at': None
@@ -98,6 +99,8 @@ def update_existing_article(article_id: str, article_data, creator_id: str) -> O
         updates['tags'] = article_data.tags
     if article_data.seo_description is not None:
         updates['seo_description'] = article_data.seo_description
+    if article_data.redirect_url is not None:
+        updates['redirect_url'] = article_data.redirect_url
     if article_data.status:
         updates['status'] = article_data.status
         if article_data.status == 'published' and not article.get('published_at'):

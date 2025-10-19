@@ -35,6 +35,7 @@ interface ArticleData {
   seo_description?: string;
   cover_image?: string;
   status?: string;
+  redirect_url?: string;
 }
 
 // Update the functions:

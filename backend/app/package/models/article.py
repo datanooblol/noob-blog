@@ -11,6 +11,7 @@ class ArticleCreate(BaseModel):
     cover_image: Optional[str] = None
     tags: Optional[List[str]] = []
     seo_description: Optional[str] = None
+    redirect_url: Optional[str] = None
     
     @field_validator('title')
     @classmethod
@@ -28,6 +29,7 @@ class ArticleUpdate(BaseModel):
     tags: Optional[List[str]] = None
     seo_description: Optional[str] = None
     status: Optional[str] = None
+    redirect_url: Optional[str] = None
 
 # Response models
 class ArticleResponse(BaseModel):
@@ -41,6 +43,7 @@ class ArticleResponse(BaseModel):
     creator_id: str
     tags: List[str]
     seo_description: Optional[str] = None
+    redirect_url: Optional[str] = None
     created_at: str
     updated_at: str
     published_at: Optional[str] = None
