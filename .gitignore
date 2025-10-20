@@ -49,3 +49,5 @@ localstack
 *.tfvars
 .terraformrc
 terraform.rc
+
+dev.ipynb
