@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from package.core.auth import hash_password, verify_password, create_access_token
 from package.core.database import (
@@ -22,7 +22,7 @@ def register_user(user_data: UserRegister) -> Optional[UserResponse]:
     
     # Create user record
     user_id = str(uuid.uuid4())
-    now = datetime.utcnow().isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     
     user_record = {
         'user_id': user_id,

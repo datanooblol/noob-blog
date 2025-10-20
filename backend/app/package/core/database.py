@@ -2,22 +2,20 @@ import boto3
 import os
 from typing import Optional, Dict, Any, List
 from botocore.exceptions import ClientError
+from .config import settings
 
 # DynamoDB connection
 def get_dynamodb_resource():
     """Get DynamoDB resource connection"""
-    return boto3.resource(
-        'dynamodb',
-        endpoint_url=os.getenv('DYNAMODB_ENDPOINT', 'http://localhost:8000'),
-        aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID', 'dummy'),
-        aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY', 'dummy'),
-        region_name=os.getenv('AWS_DEFAULT_REGION', 'us-east-1')
-    )
+    session = boto3.Session()
+    if settings.AWS_PROFILE and settings.ENVIRONMENT == "development":
+        session = boto3.Session(profile_name=settings.AWS_PROFILE)
+    return session.resource('dynamodb', region_name=settings.AWS_REGION)
 
 # Table references
 dynamodb = get_dynamodb_resource()
-users_table = dynamodb.Table('Users')
-articles_table = dynamodb.Table('Articles')
+users_table = dynamodb.Table(settings.DYNAMODB_TABLE_USERS)
+blogs_table = dynamodb.Table(settings.DYNAMODB_TABLE_BLOGS)
 
 # User database operations
 def get_user_by_id(user_id: str) -> Optional[Dict[str, Any]]:
@@ -86,29 +84,29 @@ def update_user(user_id: str, updates: Dict[str, Any]) -> bool:
     except ClientError:
         return False
 
-# Article database operations
-def create_article(article_data: Dict[str, Any]) -> bool:
-    """Create a new article"""
+# blog database operations
+def create_blog(blog_data: Dict[str, Any]) -> bool:
+    """Create a new blog"""
     try:
-        articles_table.put_item(Item=article_data)
+        blogs_table.put_item(Item=blog_data)
         return True
     except ClientError:
         return False
 
-def get_article_by_id(article_id: str) -> Optional[Dict[str, Any]]:
-    """Get article by article_id"""
+def get_blog_by_id(blog_id: str) -> Optional[Dict[str, Any]]:
+    """Get blog by blog_id"""
     try:
-        response = articles_table.get_item(
-            Key={'article_id': article_id, 'sk': 'METADATA'}
+        response = blogs_table.get_item(
+            Key={'blog_id': blog_id, 'sk': 'METADATA'}
         )
         return response.get('Item')
     except ClientError:
         return None
 
-def get_article_by_slug(slug: str) -> Optional[Dict[str, Any]]:
-    """Get article by slug using SlugIndex GSI"""
+def get_blog_by_slug(slug: str) -> Optional[Dict[str, Any]]:
+    """Get blog by slug using SlugIndex GSI"""
     try:
-        response = articles_table.query(
+        response = blogs_table.query(
             IndexName='SlugIndex',
             KeyConditionExpression='slug = :slug',
             ExpressionAttributeValues={':slug': slug}
@@ -118,10 +116,10 @@ def get_article_by_slug(slug: str) -> Optional[Dict[str, Any]]:
     except ClientError:
         return None
 
-def get_published_articles() -> List[Dict[str, Any]]:
-    """Get all published articles using StatusIndex GSI"""
+def get_published_blog() -> List[Dict[str, Any]]:
+    """Get all published blog using StatusIndex GSI"""
     try:
-        response = articles_table.query(
+        response = blogs_table.query(
             IndexName='StatusIndex',
             KeyConditionExpression='#status = :status',
             ExpressionAttributeNames={'#status': 'status'},
@@ -132,8 +130,8 @@ def get_published_articles() -> List[Dict[str, Any]]:
     except ClientError:
         return []
 
-def update_article(article_id: str, updates: Dict[str, Any]) -> bool:
-    """Update article data"""
+def update_blog(blog_id: str, updates: Dict[str, Any]) -> bool:
+    """Update blog data"""
     try:
         update_expr = "SET "
         expr_values = {}
@@ -153,7 +151,7 @@ def update_article(article_id: str, updates: Dict[str, Any]) -> bool:
         
         # Build update_item parameters
         update_params = {
-            'Key': {'article_id': article_id, 'sk': 'METADATA'},
+            'Key': {'blog_id': blog_id, 'sk': 'METADATA'},
             'UpdateExpression': update_expr,
             'ExpressionAttributeValues': expr_values
         }
@@ -161,41 +159,41 @@ def update_article(article_id: str, updates: Dict[str, Any]) -> bool:
         if expr_names:
             update_params['ExpressionAttributeNames'] = expr_names
         
-        articles_table.update_item(**update_params)
+        blogs_table.update_item(**update_params)
         return True
     except ClientError:
         return False
 
-def delete_article(article_id: str) -> bool:
-    """Delete article from database"""
+def delete_blog(blog_id: str) -> bool:
+    """Delete blog from database"""
     try:
-        articles_table.delete_item(
-            Key={'article_id': article_id, 'sk': 'METADATA'}
+        blogs_table.delete_item(
+            Key={'blog_id': blog_id, 'sk': 'METADATA'}
         )
         return True
     except ClientError:
         return False
 
-def get_user_articles(creator_id: str, status: Optional[str] = None) -> List[Dict[str, Any]]:
-    """Get articles by creator with optional status filter"""
+def get_user_blog(user_id: str, status: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Get blog by creator with optional status filter"""
     try:
         # Use boto3 Key for proper filtering
         from boto3.dynamodb.conditions import Attr
         
-        response = articles_table.scan(
-            FilterExpression=Attr('creator_id').eq(creator_id)
+        response = blogs_table.scan(
+            FilterExpression=Attr('user_id').eq(user_id)
         )
         
-        articles = response.get('Items', [])
+        blog = response.get('Items', [])
         
         # Filter by status if provided
         if status:
-            articles = [a for a in articles if a.get('status') == status]
+            blog = [a for a in blog if a.get('status') == status]
         
         # Sort by created_at descending
-        articles.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+        blog.sort(key=lambda x: x.get('created_at', ''), reverse=True)
         
-        return articles
+        return blog
     except ClientError as e:
         print(f"Database error: {e}")
         return []

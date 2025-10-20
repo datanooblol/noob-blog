@@ -5,38 +5,44 @@ import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
 import "../../shared-blocknote.css";
-
-// Upload function for LocalStack S3
-async function uploadFile(file: File) {
-  const formData = new FormData();
-  formData.append('file', file);
-  
-  const token = localStorage.getItem('access_token');
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/upload/image`, {
-    method: 'POST',
-    body: formData,
-    headers: {
-      'Authorization': `Bearer ${token}`
-    }
-  });
-  
-  if (!response.ok) {
-    throw new Error('Upload failed');
-  }
-  
-  const result = await response.json();
-  return result.url;
-}
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { articlesAPI } from "@/lib/api";
+import { blogAPI, uploadAPI } from "@/lib/api";
 import "./editor-styles.css";
 
-export default function ArticleEditor() {
+// Use presigned URL for S3 upload
+async function uploadFile(file: File, blogId?: string) {
+  console.log("step0");
+  if (!blogId) {
+    throw new Error("Blog ID is required for upload");
+  }
+  console.log("step1");
+  // Step 1: Get presigned URL
+  const { upload_url, public_url } = await uploadAPI.getPresignedUrl(
+    file.name,
+    file.type,
+    blogId
+  );
+  console.log("step2");
+  // Step 2: Upload directly to S3
+  const uploadResponse = await fetch(upload_url, {
+    method: "PUT",
+    body: file,
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error("S3 upload failed");
+  }
+  console.log("step3");
+  // Step 3: Return public URL
+  return public_url;
+}
+
+export default function BlogEditor() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const articleId = searchParams.get("id");
-  const isEditMode = !!articleId;
+  const blogId = searchParams.get("id");
+  const isEditMode = !!blogId;
 
   const editor = useCreateBlockNote({
     tables: {
@@ -45,7 +51,7 @@ export default function ArticleEditor() {
       cellTextColor: true,
       headers: true,
     },
-    uploadFile,
+    uploadFile: (file: File) => uploadFile(file, blogId || undefined),
   });
   const [markdownValue, setMarkdownValue] = useState("");
   const [showMarkdownModal, setShowMarkdownModal] = useState(false);
@@ -79,34 +85,34 @@ export default function ArticleEditor() {
       .trim();
   }, []);
 
-  const loadArticle = useCallback(async () => {
-    if (!articleId || !editor) return;
+  const loadBlog = useCallback(async () => {
+    if (!blogId || !editor) return;
 
     try {
-      const article = await articlesAPI.getById(articleId);
-      setTitle(article.title || "");
-      setSlug(article.slug || generateSlug(article.title || ""));
-      setStatus(article.status || "draft");
-      setRedirectUrl(article.redirect_url || "");
-      setTags(article.tags || []);
-      setSeoDescription(article.seo_description || "");
+      const blog = await blogAPI.getById(blogId);
+      setTitle(blog.title || "");
+      setSlug(blog.slug || generateSlug(blog.title || ""));
+      setStatus(blog.status || "draft");
+      setRedirectUrl(blog.redirect_url || "");
+      setTags(blog.tags || []);
+      setSeoDescription(blog.seo_description || "");
 
       if (
-        article.content &&
-        Array.isArray(article.content) &&
-        article.content.length > 0
+        blog.content &&
+        Array.isArray(blog.content) &&
+        blog.content.length > 0
       ) {
         try {
-          console.log("Loading JSON blocks:", article.content);
-          editor.replaceBlocks(editor.document, article.content);
+          console.log("Loading JSON blocks:", blog.content);
+          editor.replaceBlocks(editor.document, blog.content);
           // setLastSavedContent(JSON.stringify(article.content));
           console.log("JSON blocks loaded successfully");
         } catch (error) {
           console.log("JSON blocks failed, trying HTML fallback:", error);
-          if (article.html_content) {
+          if (blog.html_content) {
             try {
-              console.log("HTML content:", article.html_content);
-              const blocks = editor.tryParseHTMLToBlocks(article.html_content);
+              console.log("HTML content:", blog.html_content);
+              const blocks = editor.tryParseHTMLToBlocks(blog.html_content);
               console.log("Parsed HTML to blocks:", blocks);
               editor.replaceBlocks(editor.document, blocks);
               // setLastSavedContent(JSON.stringify(blocks));
@@ -122,9 +128,9 @@ export default function ArticleEditor() {
         setHasUnsavedChanges(false);
       }
     } catch (error) {
-      console.error("Failed to load article:", error);
+      console.error("Failed to load blog:", error);
     }
-  }, [editor, articleId, generateSlug]);
+  }, [editor, blogId, generateSlug]);
 
   const handleStatusChange = useCallback(
     async (newStatus: string) => {
@@ -139,7 +145,7 @@ export default function ArticleEditor() {
         const content = editor.document;
         const html_content = await editor.blocksToHTMLLossy(content);
 
-        await articlesAPI.update(articleId!, {
+        await blogAPI.update(blogId!, {
           title,
           slug,
           content,
@@ -157,7 +163,7 @@ export default function ArticleEditor() {
         alert("Status change failed");
       }
     },
-    [editor, articleId, title, slug, status, redirectUrl, tags, seoDescription]
+    [editor, blogId, title, slug, status, redirectUrl, tags, seoDescription]
   );
 
   const handleSave = useCallback(async () => {
@@ -177,13 +183,13 @@ export default function ArticleEditor() {
         seo_description: seoDescription,
       };
 
-      if (isEditMode && articleId) {
-        await articlesAPI.update(articleId, payload);
+      if (isEditMode && blogId) {
+        await blogAPI.update(blogId, payload);
         alert("Updated successfully!");
       } else {
-        const newArticle = await articlesAPI.create(payload);
+        const newBlog = await blogAPI.create(payload);
         alert("Created successfully!");
-        router.push(`/editor?id=${newArticle.article_id}`);
+        router.push(`/editor?id=${newBlog.blog_id}`);
       }
 
       // setLastSavedContent(JSON.stringify(content));
@@ -194,7 +200,7 @@ export default function ArticleEditor() {
     }
   }, [
     editor,
-    articleId,
+    blogId,
     isEditMode,
     title,
     slug,
@@ -254,30 +260,53 @@ export default function ArticleEditor() {
     }
   }, [title, slug, redirectUrl, tags, seoDescription]);
 
-  // Load article content on mount
+  // Auto-create draft for new articles or load existing
   useEffect(() => {
-    if (articleId && editor) {
-      loadArticle();
-    }
-  }, [articleId, editor, loadArticle]);
+    const initializeEditor = async () => {
+      if (!editor) return;
+
+      if (blogId) {
+        // Load existing blog
+        loadBlog();
+      } else {
+        // Create draft blog for new posts
+        try {
+          const newBlog = await blogAPI.create({
+            title: "Untitled Blog",
+            content: [],
+            status: "draft",
+          });
+          // Update URL with new blog ID
+          router.replace(`/editor?id=${newBlog.blog_id}`);
+        } catch (error) {
+          console.error("Failed to create draft blog:", error);
+        }
+      }
+    };
+
+    initializeEditor();
+  }, [blogId, editor, loadBlog, router]);
 
   // Warn before leaving page with unsaved changes
   useEffect(() => {
     // Expose unsaved changes state to window for admin layout
-    (window as unknown as { hasUnsavedChanges: boolean }).hasUnsavedChanges = hasUnsavedChanges;
-    
+    (window as unknown as { hasUnsavedChanges: boolean }).hasUnsavedChanges =
+      hasUnsavedChanges;
+
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasUnsavedChanges) {
         e.preventDefault();
-        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
-        return 'You have unsaved changes. Are you sure you want to leave?';
+        e.returnValue =
+          "You have unsaved changes. Are you sure you want to leave?";
+        return "You have unsaved changes. Are you sure you want to leave?";
       }
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload);
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      (window as unknown as { hasUnsavedChanges: boolean }).hasUnsavedChanges = false;
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      (window as unknown as { hasUnsavedChanges: boolean }).hasUnsavedChanges =
+        false;
     };
   }, [hasUnsavedChanges]);
 
@@ -286,7 +315,7 @@ export default function ArticleEditor() {
       <div className="bg-white rounded-lg shadow-sm p-8">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold">Article Editor</h1>
+            <h1 className="text-2xl font-bold">Blog Editor</h1>
             {hasUnsavedChanges && (
               <span className="text-sm text-orange-600 font-medium">
                 • Unsaved changes
@@ -326,7 +355,7 @@ export default function ArticleEditor() {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Enter your article title..."
+            placeholder="Enter your blog title..."
             className="w-full text-4xl font-bold border-none p-0 focus:outline-none placeholder:text-gray-400 mb-4"
           />
           <div className="space-y-2">
@@ -337,7 +366,7 @@ export default function ArticleEditor() {
                 type="text"
                 value={slug}
                 onChange={(e) => setSlug(e.target.value)}
-                placeholder="article-slug"
+                placeholder="blog-slug"
                 className="text-sm border-none p-0 focus:outline-none bg-transparent"
               />
             </div>
@@ -361,7 +390,7 @@ export default function ArticleEditor() {
             </div>
             {redirectUrl && (
               <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
-                ℹ️ Visitors to this article will be redirected to the URL above
+                ℹ️ Visitors to this blog will be redirected to the URL above
                 (301 redirect)
               </div>
             )}
@@ -383,7 +412,9 @@ export default function ArticleEditor() {
           />
           <div className="flex justify-between text-xs text-gray-500 mt-1">
             <span>Used for search results and social media previews</span>
-            <span className={seoDescription.length > 160 ? 'text-orange-600' : ''}>
+            <span
+              className={seoDescription.length > 160 ? "text-orange-600" : ""}
+            >
               {seoDescription.length}/160 characters
             </span>
           </div>

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -27,7 +27,7 @@ interface RegisterData {
   display_name: string;
 }
 
-interface ArticleData {
+interface BlogData {
   title: string;
   slug?: string;
   content: object[]; // BlockNote content array
@@ -55,46 +55,62 @@ export const authAPI = {
   },
 };
 
-// Articles endpoints
-export const articlesAPI = {
+// Upload endpoints
+export const uploadAPI = {
+  getPresignedUrl: async (
+    filename: string,
+    contentType: string,
+    blogId: string
+  ) => {
+    const response = await api.post("/upload/presigned", {
+      filename,
+      content_type: contentType,
+      blog_id: blogId,
+    });
+    return response.data;
+  },
+};
+
+// blog endpoints
+export const blogAPI = {
   getAll: async (search?: string, tags?: string[]) => {
     const params: Record<string, string> = {};
     if (search) params.search = search;
-    if (tags?.length) params.tags = tags.join(',');
-    const response = await api.get("/articles/", { params });
+    if (tags?.length) params.tags = tags.join(",");
+    const response = await api.get("/blog/", { params });
     return response.data;
   },
   getMy: async (status?: string, search?: string, tags?: string[]) => {
     const params: Record<string, string> = {};
     if (status) params.status = status;
     if (search) params.search = search;
-    if (tags?.length) params.tags = tags.join(',');
-    const response = await api.get("/articles/my", { params });
+    if (tags?.length) params.tags = tags.join(",");
+    const response = await api.get("/blog/my", { params });
     return response.data;
   },
   getById: async (id: string) => {
-    const response = await api.get(`/articles/${id}`);
+    const response = await api.get(`/blog/id/${id}`);
     return response.data;
   },
-  create: async (data: ArticleData) => {
-    const response = await api.post("/articles/", data);
+  create: async (data: BlogData) => {
+    const response = await api.post("/blog/", data);
     return response.data;
   },
-  update: async (id: string, data: Partial<ArticleData>) => {
-    const response = await api.put(`/articles/${id}`, data);
+  update: async (id: string, data: Partial<BlogData>) => {
+    const response = await api.put(`/blog/${id}`, data);
     return response.data;
   },
   delete: async (id: string) => {
-    const response = await api.delete(`/articles/${id}`);
+    const response = await api.delete(`/blog/${id}`);
     return response.data;
   },
   publish: async (id: string) => {
-    const response = await api.patch(`/articles/${id}/publish`);
+    const response = await api.patch(`/blog/${id}/publish`);
     return response.data;
   },
-  // Add this to articlesAPI object
+  // Add this to blogAPI object
   getBySlug: async (slug: string) => {
-    const response = await api.get(`/articles/slug/${slug}`);
+    const response = await api.get(`/blog/${slug}`);
     return response.data;
   },
 };
