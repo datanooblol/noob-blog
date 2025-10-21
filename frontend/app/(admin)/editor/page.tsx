@@ -51,7 +51,10 @@ export default function BlogEditor() {
       cellTextColor: true,
       headers: true,
     },
-    uploadFile: (file: File) => uploadFile(file, blogId || undefined),
+    uploadFile: (file: File) => {
+      const currentBlogId = searchParams.get("id");
+      return uploadFile(file, currentBlogId || undefined);
+    },
   });
   const [markdownValue, setMarkdownValue] = useState("");
   const [showMarkdownModal, setShowMarkdownModal] = useState(false);

@@ -181,19 +181,22 @@
 }
 
 /* Image alignment for blog display only */
-.article-content img {
+/* .article-content img {
   max-width: 100%;
   height: auto;
   display: block;
   margin: 1.5rem auto;
   border-radius: 0.5rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
+} */
 
-/* Image alignment based on BlockNote data attributes */
-.article-content img[data-text-alignment="left"],
-.article-content .bn-block-content[data-text-alignment="left"] img {
-  margin: 1.5rem 0 1.5rem 0 !important;
+.article-content img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5rem 0; /* Left-aligned by default */
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .article-content img[data-text-alignment="center"],
